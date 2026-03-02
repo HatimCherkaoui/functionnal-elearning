@@ -3,6 +3,7 @@ package org.eckmo.functionnal.controller;
 import lombok.RequiredArgsConstructor;
 import org.eckmo.functionnal.model.Notification;
 import org.eckmo.functionnal.service.NotificationService;
+import org.eckmo.functionnal.service.UserService;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,6 +16,7 @@ import java.util.Map;
 public class NotificationController {
 
     private final NotificationService notificationService;
+    private final UserService userService;
 
     @GetMapping("/count")
     public Map<String, Long> getUnreadCount(Authentication auth) {
@@ -51,8 +53,12 @@ public class NotificationController {
     }
 
     private Long extractUserId(Authentication auth) {
-        // Extract user ID from authentication principal
-        return 1L; // Placeholder - implement proper user extraction
+        if (auth == null || auth.getName() == null) {
+            throw new IllegalStateException("User not authenticated");
+        }
+        // Extract email from authentication principal and get user ID
+        String email = auth.getName();
+        return userService.getUserByEmail(email).getId();
     }
 }
 

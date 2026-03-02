@@ -170,4 +170,19 @@ public class UiController {
     public ResponseEntity<Map<String, Object>> searchApi(@RequestParam String q) {
         return ResponseEntity.ok(searchService.globalSearch(q));
     }
+
+    @GetMapping("/notifications")
+    public String notifications(Model model) {
+        return "ui/notifications";
+    }
+
+    @GetMapping("/subscriptions")
+    public String subscriptions(Model model) {
+        return "ui/subscriptions";
+    }
+
+    @GetMapping("/profile")
+    public String profile(Model model) {
+        return "ui/profile";
+    }
 }

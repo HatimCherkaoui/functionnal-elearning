@@ -5,4 +5,8 @@ databaseChangeLog:
       file: db/changelog/changes/002-instructor-approval.yaml
   - include:
       file: db/changelog/changes/003-seed-admin-user.yaml
+  - include:
+      file: db/changelog/changes/004-add-enrollments-updated-at.yaml
+  - include:
+      file: db/changelog/changes/005-fix-notifications-table.yaml
 

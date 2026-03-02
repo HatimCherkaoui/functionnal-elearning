@@ -6,13 +6,20 @@ import org.eckmo.functionnal.model.InstructorDocument;
 import org.eckmo.functionnal.model.User;
 import org.eckmo.functionnal.service.InstructorDocumentService;
 import org.eckmo.functionnal.service.UserService;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 @Controller
@@ -97,5 +104,29 @@ public class AdminController {
         user.setRole(role);
         userService.updateUser(id, user);
         return "redirect:/ui/admin/users";
+    }
+
+    @GetMapping("/documents/{id}/download")
+    public ResponseEntity<Resource> downloadDocument(@PathVariable Long id) {
+        try {
+            InstructorDocument document = documentService.getDocumentById(id);
+            Path filePath = Paths.get(documentService.getUploadDir()).resolve(document.getFileName());
+            Resource resource = new UrlResource(filePath.toUri());
+
+            if (resource.exists() && resource.isReadable()) {
+                String contentType = document.getFileType() != null ?
+                    document.getFileType() : "application/octet-stream";
+
+                return ResponseEntity.ok()
+                        .contentType(MediaType.parseMediaType(contentType))
+                        .header(HttpHeaders.CONTENT_DISPOSITION,
+                            "attachment; filename=\"" + document.getOriginalName() + "\"")
+                        .body(resource);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 }

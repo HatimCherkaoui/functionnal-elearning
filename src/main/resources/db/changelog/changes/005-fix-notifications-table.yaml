@@ -1,0 +1,45 @@
+databaseChangeLog:
+  - changeSet:
+      id: 005-add-notifications-missing-columns
+      author: elearning
+      changes:
+        - addColumn:
+            tableName: notifications
+            columns:
+              - column:
+                  name: type
+                  type: VARCHAR(100)
+                  defaultValue: SYSTEM_NOTIFICATION
+                  constraints:
+                    nullable: false
+              - column:
+                  name: related_entity_type
+                  type: VARCHAR(100)
+                  defaultValue: SYSTEM
+                  constraints:
+                    nullable: false
+              - column:
+                  name: related_entity_id
+                  type: BIGINT
+        - dropColumn:
+            tableName: notifications
+            columnName: updated_at
+      rollback:
+        - dropColumn:
+            tableName: notifications
+            columnName: type
+        - dropColumn:
+            tableName: notifications
+            columnName: related_entity_type
+        - dropColumn:
+            tableName: notifications
+            columnName: related_entity_id
+        - addColumn:
+            tableName: notifications
+            columns:
+              - column:
+                  name: updated_at
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+

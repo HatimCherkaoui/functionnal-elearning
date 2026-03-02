@@ -54,6 +54,12 @@
           <div style="font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" th:text="${doc.originalName}"></div>
           <div style="font-size:12px;color:var(--text-muted);margin-top:2px" th:text="${doc.fileType} + ' · ' + ${#temporals.format(doc.uploadedAt, 'MMM dd, yyyy')}"></div>
         </div>
+        <a th:href="@{/ui/admin/documents/{id}/download(id=${doc.id})}"
+           class="btn btn-sm btn-ghost"
+           style="flex-shrink: 0;"
+           title="Download document">
+          📥 Download
+        </a>
       </div>
     </div>
   </div>

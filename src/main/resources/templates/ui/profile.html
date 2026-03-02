@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>My Profile</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}" />
+    <style>
+        .profile-container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        .profile-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 16px;
+            padding: 40px;
+            color: white;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+        .profile-avatar-large {
+            width: 120px;
+            height: 120px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            backdrop-filter: blur(10px);
+            border: 3px solid rgba(255, 255, 255, 0.3);
+        }
+        .profile-header-info h1 {
+            margin: 0 0 10px 0;
+            font-size: 32px;
+            font-weight: 700;
+        }
+        .profile-header-info p {
+            margin: 5px 0;
+            opacity: 0.9;
+            font-size: 16px;
+        }
+        .profile-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.25);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+        .profile-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+        .profile-card h2 {
+            margin: 0 0 20px 0;
+            font-size: 20px;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .profile-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        .info-item {
+            padding: 15px;
+            background: var(--surface2);
+            border-radius: 10px;
+        }
+        .info-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        .info-value {
+            font-size: 16px;
+            color: var(--text);
+            font-weight: 500;
+        }
+        .bio-text {
+            color: var(--text);
+            line-height: 1.7;
+            font-size: 15px;
+        }
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .status-active {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .status-approved {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+    </style>
+</head>
+<body>
+<div th:insert="layout/navbar"></div>
+
+<div class="main-content" id="mainContent">
+<div class="profile-container">
+    <!-- Profile Header -->
+    <div class="profile-header">
+        <div class="profile-avatar-large">👤</div>
+        <div class="profile-header-info">
+            <h1 id="profileName">Loading...</h1>
+            <p id="profileEmail">email@example.com</p>
+            <span class="profile-badge" id="profileRole">Role</span>
+        </div>
+    </div>
+
+    <!-- Account Information -->
+    <div class="profile-card">
+        <h2>📋 Account Information</h2>
+        <div class="profile-info-grid">
+            <div class="info-item">
+                <div class="info-label">Full Name</div>
+                <div class="info-value" id="fullName">--</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Email Address</div>
+                <div class="info-value" id="emailValue">--</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Role</div>
+                <div class="info-value" id="roleValue">--</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Account Status</div>
+                <div class="info-value">
+                    <span class="status-badge status-active" id="statusBadge">
+                        <span>●</span> Active
+                    </span>
+                </div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Member Since</div>
+                <div class="info-value" id="memberSince">--</div>
+            </div>
+            <div class="info-item" id="approvalStatusItem" style="display: none;">
+                <div class="info-label">Approval Status</div>
+                <div class="info-value" id="approvalStatus">--</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bio Section -->
+    <div class="profile-card" id="bioCard" style="display: none;">
+        <h2>📝 Professional Bio</h2>
+        <p class="bio-text" id="bioText">No bio provided</p>
+    </div>
+
+    <!-- Rejection Reason (if applicable) -->
+    <div class="profile-card" id="rejectionCard" style="display: none;">
+        <h2>⚠️ Rejection Reason</h2>
+        <p class="bio-text" style="color: #dc3545;" id="rejectionReason">--</p>
+    </div>
+</div>
+
+<script>
+    // Load user profile data
+    async function loadProfile() {
+        try {
+            // Get current user email from authentication
+            const email = document.querySelector('[sec\\:authentication="name"]')?.textContent ||
+                         document.querySelector('.pmh-name')?.textContent;
+
+            if (!email) {
+                console.error('Could not determine user email');
+                return;
+            }
+
+            // Fetch all users and find current user
+            const response = await fetch('/api/users');
+            const users = await response.json();
+            const currentUser = users.find(u => u.email === email);
+
+            if (!currentUser) {
+                console.error('User not found');
+                return;
+            }
+
+            // Update profile header
+            document.getElementById('profileName').textContent =
+                `${currentUser.firstName} ${currentUser.lastName}`;
+            document.getElementById('profileEmail').textContent = currentUser.email;
+            document.getElementById('profileRole').textContent = currentUser.role;
+
+            // Update account information
+            document.getElementById('fullName').textContent =
+                `${currentUser.firstName} ${currentUser.lastName}`;
+            document.getElementById('emailValue').textContent = currentUser.email;
+            document.getElementById('roleValue').textContent = currentUser.role;
+            document.getElementById('memberSince').textContent =
+                currentUser.createdAt || 'Unknown';
+
+            // Update status
+            const statusBadge = document.getElementById('statusBadge');
+            if (currentUser.isActive) {
+                statusBadge.className = 'status-badge status-active';
+                statusBadge.innerHTML = '<span>●</span> Active';
+            } else {
+                statusBadge.className = 'status-badge status-pending';
+                statusBadge.innerHTML = '<span>●</span> Inactive';
+            }
+
+            // Show approval status for instructors
+            if (currentUser.role === 'INSTRUCTOR' && currentUser.approvalStatus) {
+                document.getElementById('approvalStatusItem').style.display = 'block';
+                const approvalEl = document.getElementById('approvalStatus');
+                approvalEl.textContent = currentUser.approvalStatus;
+
+                if (currentUser.approvalStatus === 'APPROVED') {
+                    approvalEl.innerHTML = '<span class="status-badge status-approved">✓ Approved</span>';
+                } else if (currentUser.approvalStatus === 'PENDING') {
+                    approvalEl.innerHTML = '<span class="status-badge status-pending">⏳ Pending Review</span>';
+                } else if (currentUser.approvalStatus === 'REJECTED' && currentUser.rejectionReason) {
+                    approvalEl.innerHTML = '<span class="status-badge" style="background: #f8d7da; color: #721c24;">✗ Rejected</span>';
+                    document.getElementById('rejectionCard').style.display = 'block';
+                    document.getElementById('rejectionReason').textContent = currentUser.rejectionReason;
+                }
+            }
+
+            // Show bio if available
+            if (currentUser.bio) {
+                document.getElementById('bioCard').style.display = 'block';
+                document.getElementById('bioText').textContent = currentUser.bio;
+            }
+
+        } catch (error) {
+            console.error('Failed to load profile:', error);
+        }
+    }
+
+    // Load profile on page load
+    loadProfile();
+</script>
+
+</div>
+</body>
+</html>
+

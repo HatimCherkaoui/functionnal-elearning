@@ -60,5 +60,15 @@ public class InstructorDocumentService {
     public List<InstructorDocument> getDocumentsByUser(Long userId) {
         return documentRepository.findByUserId(userId);
     }
+
+    @Transactional(readOnly = true)
+    public InstructorDocument getDocumentById(Long id) {
+        return documentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Document not found with id: " + id));
+    }
+
+    public String getUploadDir() {
+        return uploadDir;
+    }
 }
 

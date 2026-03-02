@@ -16,9 +16,9 @@ databaseChangeLog:
                   name: email
                   value: admin@elearning.com
               - column:
-                  # BCrypt hash for "admin123"
+                  # BCrypt hash for "admin123" - verified working hash from BCryptHashGenerator test
                   name: password
-                  value: "$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iJSNvZs3obQIaLHnGCbXCNMQLDlC"
+                  value: "$2a$10$T2vKexYNM7IfVwcsMfqfMuT1d5SEdi9XYZRRyb7GTHfe9g7kI16x6"
               - column:
                   name: role
                   value: ADMIN

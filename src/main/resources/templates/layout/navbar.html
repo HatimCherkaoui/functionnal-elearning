@@ -188,14 +188,12 @@
                 <div class="profile-avatar">👤</div>
                 <div class="profile-info">
                     <div class="pname" sec:authentication="name">User</div>
-                    <div class="prole" sec:authentication="authorities">Role</div>
                 </div>
                 <span class="profile-chevron">▼</span>
             </button>
             <div class="profile-menu" id="profileMenu">
                 <div class="pmh">
                     <div class="pmh-name" sec:authentication="name">User</div>
-                    <div class="pmh-email" sec:authentication="authorities">Roles</div>
                 </div>
                 <a th:href="@{/ui/profile}"><span class="pm-icon">👤</span> My Profile</a>
                 <a th:href="@{/ui/notifications}"><span class="pm-icon">📬</span> Notifications</a>
