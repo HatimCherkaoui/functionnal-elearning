@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Admin Dashboard - EduLearn</title>
+    <th:block th:replace="~{layout/navbar :: head}"></th:block>
+</head>
+<body>
+<th:block th:replace="~{layout/navbar :: chrome}"></th:block>
+
+<div style="margin-bottom:24px">
+    <h1 style="font-size:22px;font-weight:800">⚙️ Admin Dashboard</h1>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:24px">
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px">
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);margin-bottom:8px">Total Users
+        </div>
+        <div style="font-size:30px;font-weight:800" th:text="${userCount}">0</div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px">
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);margin-bottom:8px">Active Users
+        </div>
+        <div style="font-size:30px;font-weight:800" th:text="${activeUsers}">0</div>
+    </div>
+    <div style="background:rgba(250,204,21,.1);border:1px solid rgba(250,204,21,.3);border-radius:16px;padding:20px">
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#facc15;margin-bottom:8px">Pending Instructors
+        </div>
+        <div style="font-size:30px;font-weight:800;color:#facc15" th:text="${pendingCount}">0</div>
+    </div>
+</div>
+
+<div class="panel" th:if="${pendingInstructors != null and !pendingInstructors.isEmpty()}">
+    <div class="panel-header">
+        <h2>⏳ Pending Instructor Applications</h2>
+        <a th:href="@{/ui/admin/instructors/pending}" class="btn btn-sm btn-ghost">View All →</a>
+    </div>
+    <div style="overflow-x:auto">
+        <table class="data-table">
+            <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Applied</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="i : ${pendingInstructors}">
+                <td style="font-weight:600" th:text="${i.firstName + ' ' + i.lastName}"></td>
+                <td style="color:var(--text-muted)" th:text="${i.email}"></td>
+                <td style="color:var(--text-muted);font-size:13px" th:text="${i.createdAt}"></td>
+                <td>
+                    <a th:href="@{/ui/admin/instructors/{id}/review(id=${i.id})}" class="btn btn-sm btn-ghost">Review →</a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="panel">
+    <div class="panel-header">
+        <h2>🔗 Quick Links</h2>
+    </div>
+    <div class="panel-body" style="display:flex;gap:12px;flex-wrap:wrap">
+        <a th:href="@{/ui/admin/users}" class="btn btn-ghost">👥 Manage Users</a>
+        <a th:href="@{/ui/courses}" class="btn btn-ghost">📚 Manage Courses</a>
+        <a th:href="@{/ui/enrollments}" class="btn btn-ghost">🎫 Enrollments</a>
+        <a th:href="@{/ui/analytics}" class="btn btn-ghost">📊 Analytics</a>
+    </div>
+</div>
+</main>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Dashboard - EduLearn</title>
+    <th:block th:replace="~{layout/navbar :: head}"></th:block>
+</head>
+<body>
+<th:block th:replace="~{layout/navbar :: chrome}"></th:block>
+
+<!-- Stats row -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px">
+            <div style="font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);margin-bottom:8px">Total Users
+            </div>
+            <div style="font-size:32px;font-weight:800" th:text="${userCount}">0</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px">
+            <div style="font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);margin-bottom:8px">Courses
+            </div>
+            <div style="font-size:32px;font-weight:800" th:text="${courseCount}">0</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px">
+            <div style="font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);margin-bottom:8px">Enrollments
+            </div>
+            <div style="font-size:32px;font-weight:800" th:text="${enrollmentCount}">0</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px">
+            <div style="font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);margin-bottom:8px">Revenue
+            </div>
+            <div style="font-size:32px;font-weight:800"
+                 th:text="${totalRevenue != null ? '$' + #numbers.formatDecimal(totalRevenue,1,2) : '$0'}">$0
+            </div>
+        </div>
+    </div>
+
+    <!-- Pending instructors alert (admin only) -->
+    <div sec:authorize="hasRole('ADMIN')"
+         th:if="${pendingInstructorCount != null and pendingInstructorCount > 0}"
+         style="background:rgba(250,204,21,.1);border:1px solid rgba(250,204,21,.3);border-radius:14px;padding:16px 20px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;gap:12px">
+        <div style="display:flex;align-items:center;gap:12px">
+            <span style="font-size:20px">⏳</span>
+            <div>
+                <div style="font-weight:700;color:#facc15"
+                     th:text="${pendingInstructorCount} + ' instructor application(s) pending review'"></div>
+                <div style="font-size:13px;color:var(--text-muted);margin-top:2px">New instructors are waiting for your
+                    approval
+                </div>
+            </div>
+        </div>
+        <a th:href="@{/ui/admin/instructors/pending}" class="btn btn-sm"
+           style="background:#facc15;color:#0f0f1a;font-weight:700">Review Now →</a>
+    </div>
+
+    <!-- Top students panel -->
+    <div class="panel">
+        <div class="panel-header">
+            <h2>🏆 Top Students</h2>
+        </div>
+        <div style="overflow-x:auto">
+            <table class="data-table">
+                <thead>
+                <tr>
+                    <th>Student</th>
+                    <th>Avg Score</th>
+                    <th>Completions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="s : ${topStudents}">
+                    <td th:text="${s}"></td>
+                    <td>—</td>
+                    <td>—</td>
+                </tr>
+                <tr th:if="${topStudents == null or topStudents.isEmpty()}">
+                    <td colspan="3"
+                        style="text-align:center;padding:32px;color:var(--text-muted)">No data yet
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+</body>
+</html>

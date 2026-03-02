@@ -1,0 +1,623 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001-create-users-table
+      author: elearning
+      changes:
+        - createTable:
+            tableName: users
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: first_name
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: last_name
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: email
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: password
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: role
+                  type: VARCHAR(50)
+                  defaultValue: STUDENT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_active
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+              - column:
+                  name: created_at
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: 001-create-courses-table
+      author: elearning
+      changes:
+        - createTable:
+            tableName: courses
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: title
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: TEXT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: category
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: level
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: price
+                  type: DOUBLE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: max_students
+                  type: INT
+                  defaultValueNumeric: 100
+              - column:
+                  name: rating
+                  type: DOUBLE
+                  defaultValueNumeric: 0.0
+              - column:
+                  name: is_published
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+              - column:
+                  name: instructor_id
+                  type: BIGINT
+              - column:
+                  name: created_at
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: courses
+            baseColumnNames: instructor_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_course_instructor
+            onDelete: SET NULL
+
+  - changeSet:
+      id: 001-create-lessons-table
+      author: elearning
+      changes:
+        - createTable:
+            tableName: lessons
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: title
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: content
+                  type: TEXT
+              - column:
+                  name: order_index
+                  type: INT
+                  defaultValueNumeric: 0
+              - column:
+                  name: duration_minutes
+                  type: INT
+                  defaultValueNumeric: 0
+              - column:
+                  name: course_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: lessons
+            baseColumnNames: course_id
+            referencedTableName: courses
+            referencedColumnNames: id
+            constraintName: fk_lesson_course
+            onDelete: CASCADE
+
+  - changeSet:
+      id: 001-create-lesson-steps-table
+      author: elearning
+      changes:
+        - createTable:
+            tableName: lesson_steps
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: title
+                  type: VARCHAR(255)
+              - column:
+                  name: content
+                  type: TEXT
+              - column:
+                  name: step_type
+                  type: VARCHAR(50)
+              - column:
+                  name: order_index
+                  type: INT
+                  defaultValueNumeric: 0
+              - column:
+                  name: lesson_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: lesson_steps
+            baseColumnNames: lesson_id
+            referencedTableName: lessons
+            referencedColumnNames: id
+            constraintName: fk_step_lesson
+            onDelete: CASCADE
+
+  - changeSet:
+      id: 001-create-enrollments-table
+      author: elearning
+      changes:
+        - createTable:
+            tableName: enrollments
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: course_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: progress
+                  type: DOUBLE
+                  defaultValueNumeric: 0.0
+              - column:
+                  name: score
+                  type: DOUBLE
+                  defaultValueNumeric: 0.0
+              - column:
+                  name: status
+                  type: VARCHAR(50)
+                  defaultValue: ACTIVE
+              - column:
+                  name: enrolled_at
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+              - column:
+                  name: completed_at
+                  type: DATETIME
+        - addForeignKeyConstraint:
+            baseTableName: enrollments
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_enrollment_user
+            onDelete: CASCADE
+        - addForeignKeyConstraint:
+            baseTableName: enrollments
+            baseColumnNames: course_id
+            referencedTableName: courses
+            referencedColumnNames: id
+            constraintName: fk_enrollment_course
+            onDelete: CASCADE
+
+  - changeSet:
+      id: 001-create-certificates-table
+      author: elearning
+      changes:
+        - createTable:
+            tableName: certificates
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: course_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: certificate_code
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: issued_date
+                  type: DATE
+              - column:
+                  name: created_at
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: certificates
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_cert_user
+            onDelete: CASCADE
+        - addForeignKeyConstraint:
+            baseTableName: certificates
+            baseColumnNames: course_id
+            referencedTableName: courses
+            referencedColumnNames: id
+            constraintName: fk_cert_course
+            onDelete: CASCADE
+
+  - changeSet:
+      id: 001-create-quizzes-table
+      author: elearning
+      changes:
+        - createTable:
+            tableName: quizzes
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: title
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: TEXT
+              - column:
+                  name: passing_score
+                  type: DOUBLE
+                  defaultValueNumeric: 70.0
+              - column:
+                  name: course_id
+                  type: BIGINT
+              - column:
+                  name: created_at
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: quizzes
+            baseColumnNames: course_id
+            referencedTableName: courses
+            referencedColumnNames: id
+            constraintName: fk_quiz_course
+            onDelete: CASCADE
+
+  - changeSet:
+      id: 001-create-questions-table
+      author: elearning
+      changes:
+        - createTable:
+            tableName: questions
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: text
+                  type: TEXT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: question_type
+                  type: VARCHAR(50)
+              - column:
+                  name: points
+                  type: INT
+                  defaultValueNumeric: 1
+              - column:
+                  name: quiz_id
+                  type: BIGINT
+              - column:
+                  name: created_at
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: questions
+            baseColumnNames: quiz_id
+            referencedTableName: quizzes
+            referencedColumnNames: id
+            constraintName: fk_question_quiz
+            onDelete: CASCADE
+
+  - changeSet:
+      id: 001-create-answers-table
+      author: elearning
+      changes:
+        - createTable:
+            tableName: answers
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: text
+                  type: TEXT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_correct
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+              - column:
+                  name: question_id
+                  type: BIGINT
+              - column:
+                  name: created_at
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: answers
+            baseColumnNames: question_id
+            referencedTableName: questions
+            referencedColumnNames: id
+            constraintName: fk_answer_question
+            onDelete: CASCADE
+
+  - changeSet:
+      id: 001-create-step-questions-table
+      author: elearning
+      changes:
+        - createTable:
+            tableName: step_questions
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: question_text
+                  type: TEXT
+              - column:
+                  name: lesson_step_id
+                  type: BIGINT
+              - column:
+                  name: created_at
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: step_questions
+            baseColumnNames: lesson_step_id
+            referencedTableName: lesson_steps
+            referencedColumnNames: id
+            constraintName: fk_stepq_step
+            onDelete: CASCADE
+
+  - changeSet:
+      id: 001-create-notifications-table
+      author: elearning
+      changes:
+        - createTable:
+            tableName: notifications
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: title
+                  type: VARCHAR(255)
+              - column:
+                  name: message
+                  type: TEXT
+              - column:
+                  name: is_read
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+              - column:
+                  name: created_at
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: notifications
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_notif_user
+            onDelete: CASCADE
+
+  - changeSet:
+      id: 001-create-subscriptions-table
+      author: elearning
+      changes:
+        - createTable:
+            tableName: subscriptions
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: BIGINT
+              - column:
+                  name: plan_name
+                  type: VARCHAR(100)
+              - column:
+                  name: price
+                  type: DOUBLE
+              - column:
+                  name: start_date
+                  type: DATE
+              - column:
+                  name: end_date
+                  type: DATE
+              - column:
+                  name: is_active
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+              - column:
+                  name: created_at
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: subscriptions
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_sub_user
+            onDelete: CASCADE
+

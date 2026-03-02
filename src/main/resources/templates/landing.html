@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Learning Platform</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}" />
+    <style>
+        .landing-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .landing-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            max-width: 900px;
+            width: 100%;
+            align-items: center;
+        }
+
+        .landing-hero {
+            color: white;
+            padding: 40px;
+        }
+
+        .landing-hero h1 {
+            font-size: 48px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            text-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .landing-hero p {
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            opacity: 0.95;
+        }
+
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .feature-list li {
+            padding: 12px 0;
+            padding-left: 35px;
+            position: relative;
+            font-size: 16px;
+        }
+
+        .feature-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        .landing-forms {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-section h2 {
+            color: #2d3748;
+            margin-bottom: 20px;
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .form-section p {
+            color: #718096;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .btn-large {
+            padding: 16px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-login {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn-register {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+
+        .btn-register:hover {
+            background: rgba(102, 126, 234, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .divider {
+            text-align: center;
+            color: #cbd5e0;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .landing-content {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            .landing-hero {
+                order: 2;
+                padding: 20px;
+            }
+
+            .landing-hero h1 {
+                font-size: 36px;
+            }
+
+            .landing-forms {
+                order: 1;
+            }
+
+            .form-section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="landing-container">
+    <div class="landing-content">
+        <div class="landing-hero">
+            <h1>🎓 Welcome to E-Learning</h1>
+            <p>Master new skills with our comprehensive online learning platform</p>
+            <ul class="feature-list">
+                <li>Expert-led courses</li>
+                <li>Interactive quizzes & assessments</li>
+                <li>Real-time progress tracking</li>
+                <li>Certificates of completion</li>
+                <li>Learn at your own pace</li>
+            </ul>
+        </div>
+
+        <div class="landing-forms">
+            <div class="form-section">
+                <h2>👋 Welcome Back</h2>
+                <p>Sign in to access your courses and continue learning</p>
+                <div class="action-buttons">
+                    <a th:href="@{/login}" class="btn-large btn-login">Sign In</a>
+                </div>
+            </div>
+
+            <div class="divider">OR</div>
+
+            <div class="form-section">
+                <h2>🚀 Get Started</h2>
+                <p>Create an account and explore amazing courses</p>
+                <div class="action-buttons">
+                    <a th:href="@{/register}" class="btn-large btn-register">Create Account</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
+

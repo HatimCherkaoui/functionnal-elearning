@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Search - EduLearn</title>
+<th:block th:replace="~{layout/navbar :: head}"></th:block>
+</head>
+<body>
+<th:block th:replace="~{layout/navbar :: chrome}"></th:block>
+
+<div style="margin-bottom:24px">
+  <h1 style="font-size:22px;font-weight:800">🔍 Search Results</h1>
+  <p style="color:var(--text-muted);margin-top:4px;font-size:14px"
+     th:text="${query != null and !query.isEmpty() ? 'Results for: &quot;' + query + '&quot;' : 'Enter a query above to search'}"></p>
+</div>
+
+<form method="get" th:action="@{/ui/search}" style="margin-bottom:28px">
+  <div style="display:flex;gap:10px">
+    <div style="flex:1;position:relative">
+      <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text-muted)">🔍</span>
+      <input type="text" name="q" th:value="${query}" placeholder="Search courses, users…"
+             style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:12px 16px 12px 42px;border-radius:12px;font-size:15px;outline:none"
+             autofocus/>
+    </div>
+    <button type="submit" class="btn btn-primary">Search</button>
+  </div>
+</form>
+
+<div th:if="${results != null and results.total == 0 and query != null and !query.isEmpty()}"
+     class="panel" style="text-align:center;padding:60px">
+  <div style="font-size:48px;margin-bottom:16px">🔎</div>
+  <h3 style="font-size:18px;margin-bottom:8px">No results found</h3>
+  <p style="color:var(--text-muted)">Try different keywords or check the spelling</p>
+</div>
+
+<!-- Courses results -->
+<div th:if="${results != null and results.courses != null and !results.courses.isEmpty()}" class="panel" style="margin-bottom:20px">
+  <div class="panel-header">
+    <h2>📚 Courses <span class="badge badge-purple" style="margin-left:8px" th:text="${results.courses.size()} + ' found'"></span></h2>
+    <a th:href="@{/ui/courses}" class="btn btn-ghost btn-sm">View All →</a>
+  </div>
+  <div style="overflow-x:auto">
+    <table class="data-table">
+      <thead><tr><th>Title</th><th>Category</th><th>Level</th><th>Price</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr th:each="c : ${results.courses}">
+          <td style="font-weight:600" th:text="${c.title}"></td>
+          <td><span class="badge badge-purple" th:text="${c.category}"></span></td>
+          <td><span class="badge badge-blue" th:text="${c.level}"></span></td>
+          <td th:text="${c.price != null ? '$' + c.price : '—'}"></td>
+          <td>
+            <span th:if="${c.isPublished}" class="badge badge-green">Published</span>
+            <span th:unless="${c.isPublished}" class="badge badge-gray">Draft</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Users results (admin/instructor only) -->
+<div th:if="${results != null and results.users != null and !results.users.isEmpty()}" class="panel">
+  <div class="panel-header">
+    <h2>👥 Users <span class="badge badge-blue" style="margin-left:8px" th:text="${results.users.size()} + ' found'"></span></h2>
+    <a th:href="@{/ui/admin/users}" class="btn btn-ghost btn-sm">View All →</a>
+  </div>
+  <div style="overflow-x:auto">
+    <table class="data-table">
+      <thead><tr><th>Name</th><th>Email</th><th>Role</th></tr></thead>
+      <tbody>
+        <tr th:each="u : ${results.users}">
+          <td>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#6366f1,#a78bfa);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:white"
+                   th:text="${#strings.substring(u.firstName,0,1)+#strings.substring(u.lastName,0,1)}"></div>
+              <span style="font-weight:600" th:text="${u.firstName + ' ' + u.lastName}"></span>
+            </div>
+          </td>
+          <td style="color:var(--text-muted)" th:text="${u.email}"></td>
+          <td>
+            <span th:switch="${u.role}">
+              <span th:case="'ADMIN'" class="badge badge-red">Admin</span>
+              <span th:case="'INSTRUCTOR'" class="badge badge-purple">Instructor</span>
+              <span th:case="*" class="badge badge-blue">Student</span>
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</main>
+</body>
+</html>
+

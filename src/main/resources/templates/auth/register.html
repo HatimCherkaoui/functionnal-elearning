@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Join EduLearn</title>
+<style>
+  :root{--primary:#6366f1;--accent:#a78bfa;--surface:#1e1e2e;--surface2:#2a2a3e;--text:#e2e8f0;--text-muted:#94a3b8;--border:rgba(255,255,255,0.08)}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#0f0f1a;color:var(--text);font-family:'Inter',-apple-system,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:24px;width:100%;max-width:520px;overflow:hidden}
+  .card-header{padding:32px 32px 0;text-align:center}
+  .logo{width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 16px}
+  .card-header h1{font-size:26px;font-weight:800;margin-bottom:6px}
+  .card-header p{color:var(--text-muted);font-size:14px}
+  .card-body{padding:28px 32px 32px}
+  .role-tabs{display:flex;background:var(--surface2);border-radius:12px;padding:4px;margin-bottom:24px;gap:4px}
+  .role-tab{flex:1;padding:10px;text-align:center;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600;color:var(--text-muted);transition:all .2s;border:none;background:none}
+  .role-tab.active{background:var(--primary);color:white;box-shadow:0 4px 12px rgba(99,102,241,.3)}
+  .form-group{margin-bottom:16px}
+  .form-group label{display:block;font-size:13px;font-weight:600;color:var(--text-muted);margin-bottom:6px}
+  .form-group input,.form-group textarea{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:11px 14px;border-radius:10px;font-size:14px;outline:none;transition:border-color .2s}
+  .form-group input:focus,.form-group textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(99,102,241,.15)}
+  .form-group input::placeholder,.form-group textarea::placeholder{color:var(--text-muted)}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .upload-zone{border:2px dashed var(--border);border-radius:12px;padding:24px;text-align:center;cursor:pointer;transition:border-color .2s}
+  .upload-zone:hover{border-color:var(--primary)}
+  .upload-zone input{display:none}
+  .upload-zone .uz-icon{font-size:32px;margin-bottom:8px}
+  .upload-zone .uz-title{font-size:14px;font-weight:600;margin-bottom:4px}
+  .upload-zone .uz-sub{font-size:12px;color:var(--text-muted)}
+  .instructor-notice{background:rgba(250,204,21,.1);border:1px solid rgba(250,204,21,.3);border-radius:12px;padding:14px 16px;font-size:13px;color:#facc15;margin-bottom:16px;display:flex;gap:10px;align-items:flex-start}
+  .btn-submit{width:100%;padding:13px;border-radius:12px;background:var(--primary);color:white;font-size:15px;font-weight:700;border:none;cursor:pointer;transition:all .2s;margin-top:8px}
+  .btn-submit:hover{background:#4f46e5;transform:translateY(-1px)}
+  .alert{border-radius:12px;padding:14px 16px;margin-bottom:20px;font-size:14px}
+  .alert-error{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);color:#f87171}
+  .alert-success{background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.3);color:#4ade80}
+  .login-link{text-align:center;margin-top:20px;font-size:14px;color:var(--text-muted)}
+  .login-link a{color:var(--accent);text-decoration:none;font-weight:600}
+  #instructorFields{display:none}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="card-header">
+    <div class="logo">🎓</div>
+    <h1>Join EduLearn</h1>
+    <p>Create your account and start your learning journey</p>
+  </div>
+  <div class="card-body">
+
+    <div th:if="${error}" class="alert alert-error">⚠️ <span th:text="${error}"></span></div>
+
+    <!-- Role tabs -->
+    <div class="role-tabs">
+      <button type="button" class="role-tab active" id="tabStudent" onclick="switchRole('STUDENT')">🎓 Student</button>
+      <button type="button" class="role-tab" id="tabInstructor" onclick="switchRole('INSTRUCTOR')">👨‍🏫 Instructor</button>
+    </div>
+
+    <form th:action="@{/register}" method="post" th:object="${userForm}" enctype="multipart/form-data">
+      <input type="hidden" id="roleField" th:field="*{role}" value="STUDENT"/>
+
+      <div class="row">
+        <div class="form-group"><label>First Name</label><input th:field="*{firstName}" placeholder="John" required/></div>
+        <div class="form-group"><label>Last Name</label><input th:field="*{lastName}" placeholder="Doe" required/></div>
+      </div>
+      <div class="form-group"><label>Email Address</label><input type="email" th:field="*{email}" placeholder="john@example.com" required/></div>
+      <div class="form-group"><label>Password</label><input type="password" th:field="*{password}" placeholder="••••••••" required minlength="6"/></div>
+
+      <!-- Instructor-only fields -->
+      <div id="instructorFields">
+        <div class="instructor-notice">
+          <span>⏳</span>
+          <div>Instructor accounts require admin approval. Please upload proof of expertise (CV, certifications, portfolio). You'll receive access once reviewed.</div>
+        </div>
+        <div class="form-group">
+          <label>Professional Bio</label>
+          <textarea th:field="*{bio}" rows="3" placeholder="Describe your expertise and teaching experience…"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Upload Proof Documents</label>
+          <div class="upload-zone" onclick="document.getElementById('docUpload').click()">
+            <input type="file" id="docUpload" name="documents" multiple accept=".pdf,.doc,.docx,.jpg,.png"/>
+            <div class="uz-icon">📎</div>
+            <div class="uz-title">Click to upload documents</div>
+            <div class="uz-sub">PDF, DOC, DOCX, JPG, PNG · Max 10MB each</div>
+          </div>
+          <div id="fileList" style="margin-top:8px;font-size:13px;color:var(--text-muted)"></div>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-submit" id="submitBtn">Create Student Account</button>
+    </form>
+
+    <div class="login-link">Already have an account? <a th:href="@{/login}">Sign in</a></div>
+  </div>
+</div>
+
+<script>
+function switchRole(role) {
+  const isInstructor = role === 'INSTRUCTOR';
+  document.getElementById('roleField').value = role;
+  document.getElementById('tabStudent').classList.toggle('active', !isInstructor);
+  document.getElementById('tabInstructor').classList.toggle('active', isInstructor);
+  document.getElementById('instructorFields').style.display = isInstructor ? 'block' : 'none';
+  document.getElementById('submitBtn').textContent = isInstructor ? 'Submit Instructor Application' : 'Create Student Account';
+}
+document.getElementById('docUpload').addEventListener('change', function() {
+  const list = document.getElementById('fileList');
+  list.innerHTML = Array.from(this.files).map(f => `<div style="padding:4px 0">📄 ${f.name}</div>`).join('');
+});
+// Set role from server-side value if needed
+const rv = document.getElementById('roleField').value;
+if (rv === 'INSTRUCTOR') switchRole('INSTRUCTOR');
+</script>
+</body>
+</html>
+

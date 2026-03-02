@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>My Subscriptions</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}" />
+</head>
+<body>
+<div th:insert="layout/navbar"></div>
+
+<div class="container" style="margin-top: 40px;">
+    <section class="section">
+        <h2>📋 My Course Subscriptions</h2>
+        <p style="color: #718096; margin-bottom: 20px;">Manage your course subscriptions and receive real-time notifications</p>
+
+        <div class="table-wrapper">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Course</th>
+                        <th>Category</th>
+                        <th>Level</th>
+                        <th>Status</th>
+                        <th>Subscribed</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="subscriptionsList">
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 40px;">Loading subscriptions...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="section" style="margin-top: 40px;">
+        <h2>🔍 Available Courses to Subscribe</h2>
+        <div id="availableCourses" style="
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        ">
+            <!-- Available courses will be loaded here -->
+        </div>
+    </section>
+</div>
+
+<script>
+    function loadSubscriptions() {
+        fetch('/api/subscriptions')
+            .then(r => r.json())
+            .then(subs => {
+                if (subs.length === 0) {
+                    document.getElementById('subscriptionsList').innerHTML =
+                        '<tr><td colspan="6" style="text-align: center;">No subscriptions yet</td></tr>';
+                    return;
+                }
+
+                document.getElementById('subscriptionsList').innerHTML = subs.map(s => `
+                    <tr>
+                        <td>${s.course.title}</td>
+                        <td>${s.course.category}</td>
+                        <td><span class="badge badge-published">${s.course.level}</span></td>
+                        <td><span class="badge badge-active">${s.isActive ? 'Active' : 'Inactive'}</span></td>
+                        <td>${new Date(s.subscribedAt).toLocaleDateString()}</td>
+                        <td>
+                            <button onclick="unsubscribe(${s.id})" class="btn-small danger">Unsubscribe</button>
+                        </td>
+                    </tr>
+                `).join('');
+            })
+            .catch(e => console.log('Error loading subscriptions', e));
+    }
+
+    function loadAvailableCourses() {
+        fetch('/api/courses')
+            .then(r => r.json())
+            .then(courses => {
+                document.getElementById('availableCourses').innerHTML = courses.map(c => `
+                    <div style="
+                        background: rgba(255, 255, 255, 0.95);
+                        padding: 20px;
+                        border-radius: 12px;
+                        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                    ">
+                        <h3 style="margin-top: 0;">${c.title}</h3>
+                        <p style="color: #718096; font-size: 14px;">${c.description}</p>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px;">
+                            <span style="font-weight: 600;">$${c.price}</span>
+                            <button onclick="subscribeToCourse(${c.id})" class="btn-small">Subscribe</button>
+                        </div>
+                    </div>
+                `).join('');
+            })
+            .catch(e => console.log('Error loading courses', e));
+    }
+
+    function subscribeToCourse(courseId) {
+        fetch(`/api/subscriptions/courses/${courseId}`, { method: 'POST' })
+            .then(() => {
+                alert('Subscribed successfully!');
+                loadSubscriptions();
+                loadAvailableCourses();
+            })
+            .catch(e => alert('Error subscribing to course'));
+    }
+
+    function unsubscribe(subscriptionId) {
+        if (confirm('Are you sure you want to unsubscribe?')) {
+            fetch(`/api/subscriptions/${subscriptionId}`, { method: 'DELETE' })
+                .then(() => loadSubscriptions());
+        }
+    }
+
+    // Load on page load
+    loadSubscriptions();
+    loadAvailableCourses();
+</script>
+
+<style>
+    .badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .badge-active {
+        background: #c6f6d5;
+        color: #22543d;
+    }
+
+    .badge-published {
+        background: #faf089;
+        color: #744210;
+    }
+
+    .btn-small {
+        padding: 6px 12px;
+        border: none;
+        border-radius: 6px;
+        background: #667eea;
+        color: white;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-small:hover {
+        background: #5568d3;
+        transform: translateY(-1px);
+    }
+
+    .btn-small.danger {
+        background: #f56565;
+    }
+
+    .btn-small.danger:hover {
+        background: #e53e3e;
+    }
+</style>
+</body>
+</html>
+

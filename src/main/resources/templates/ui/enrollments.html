@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Enrollments - EduLearn</title>
+<th:block th:replace="~{layout/navbar :: head}"></th:block>
+</head>
+<body>
+<th:block th:replace="~{layout/navbar :: chrome}"></th:block>
+<div class="panel">
+  <div class="panel-header">
+    <h2>🎫 Enrollments</h2>
+    <a href="#" onclick="document.getElementById('addEnrollModal').style.display='flex'" class="btn btn-primary btn-sm">＋ Enroll</a>
+  </div>
+
+  <div style="overflow-x:auto">
+    <table class="data-table">
+      <thead><tr><th>ID</th><th>User</th><th>Course</th><th>Progress</th><th>Score</th><th>Status</th><th>Enrolled</th><th>Actions</th></tr></thead>
+      <tbody>
+        <tr th:each="e : ${enrollmentsPage.content}">
+          <td th:text="${e.id}"></td>
+          <td th:text="${e.userId}"></td>
+          <td th:text="${e.courseId}"></td>
+          <td>
+            <div style="display:flex;align-items:center;gap:8px">
+              <div style="flex:1;height:6px;background:var(--surface2);border-radius:3px;overflow:hidden">
+                <div th:style="'width:' + ${e.progress} + '%;background:var(--primary);height:100%;border-radius:3px'"></div>
+              </div>
+              <span style="font-size:12px;color:var(--text-muted)" th:text="${e.progress + '%'}"></span>
+            </div>
+          </td>
+          <td th:text="${e.score != null ? e.score : '—'}"></td>
+          <td>
+            <span th:switch="${e.status}">
+              <span th:case="'ACTIVE'" class="badge badge-green">Active</span>
+              <span th:case="'COMPLETED'" class="badge badge-blue">Completed</span>
+              <span th:case="'DROPPED'" class="badge badge-red">Dropped</span>
+              <span th:case="*" class="badge badge-gray" th:text="${e.status}"></span>
+            </span>
+          </td>
+          <td style="color:var(--text-muted);font-size:13px" th:text="${e.enrolledAt}"></td>
+          <td>
+            <div style="display:flex;gap:5px;flex-wrap:wrap">
+              <form th:if="${e.status == 'ACTIVE'}" th:action="@{/ui/enrollments/{id}/complete(id=${e.id})}" method="post" style="margin:0">
+                <button class="btn btn-sm btn-success">✅ Complete</button>
+              </form>
+              <form th:if="${e.status == 'ACTIVE'}" th:action="@{/ui/enrollments/{id}/drop(id=${e.id})}" method="post" style="margin:0">
+                <button class="btn btn-sm btn-danger">Drop</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        <tr th:if="${enrollmentsPage == null or enrollmentsPage.content.isEmpty()}">
+          <td colspan="8" style="text-align:center;padding:40px;color:var(--text-muted)">No enrollments found</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div style="padding:16px 20px;border-top:1px solid var(--border)" th:if="${enrollmentsPage != null and enrollmentsPage.totalPages > 1}">
+    <div class="pagination">
+      <a th:if="${!enrollmentsPage.first}" th:href="@{/ui/enrollments(page=${enrollmentsPage.number-1},size=${enrollmentsPage.size})}">‹ Prev</a>
+      <span class="pg-disabled" th:unless="${!enrollmentsPage.first}">‹ Prev</span>
+      <th:block th:each="i : ${#numbers.sequence(0, enrollmentsPage.totalPages - 1)}">
+        <a th:if="${i != enrollmentsPage.number}" th:href="@{/ui/enrollments(page=${i},size=${enrollmentsPage.size})}" th:text="${i+1}"></a>
+        <span th:if="${i == enrollmentsPage.number}" class="pg-active" th:text="${i+1}"></span>
+      </th:block>
+      <a th:if="${!enrollmentsPage.last}" th:href="@{/ui/enrollments(page=${enrollmentsPage.number+1},size=${enrollmentsPage.size})}">Next ›</a>
+      <span class="pg-disabled" th:unless="${!enrollmentsPage.last}">Next ›</span>
+    </div>
+  </div>
+</div>
+
+<div id="addEnrollModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:3000;align-items:center;justify-content:center">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:28px;width:100%;max-width:400px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <h2 style="font-size:18px">🎫 New Enrollment</h2>
+      <button onclick="document.getElementById('addEnrollModal').style.display='none'" style="background:none;border:none;color:var(--text-muted);font-size:20px;cursor:pointer">✕</button>
+    </div>
+    <form th:action="@{/ui/enrollments}" method="post" th:object="${enrollmentForm}">
+      <div class="form-group"><label>User ID</label><input type="number" th:field="*{userId}" required/></div>
+      <div class="form-group"><label>Course ID</label><input type="number" th:field="*{courseId}" required/></div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button type="button" onclick="document.getElementById('addEnrollModal').style.display='none'" class="btn btn-ghost">Cancel</button>
+        <button type="submit" class="btn btn-primary">Enroll</button>
+      </div>
+    </form>
+  </div>
+</div>
+</main>
+</body>
+</html>

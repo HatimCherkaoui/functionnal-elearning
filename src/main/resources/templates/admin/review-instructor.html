@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Review Instructor - EduLearn</title>
+<th:block th:replace="~{layout/navbar :: head}"></th:block>
+</head>
+<body>
+<th:block th:replace="~{layout/navbar :: chrome}"></th:block>
+
+<div style="margin-bottom:24px">
+  <a th:href="@{/ui/admin/instructors/pending}" class="btn btn-ghost btn-sm">← Back</a>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start">
+
+  <!-- Profile -->
+  <div class="panel">
+    <div class="panel-header"><h2>👤 Instructor Profile</h2></div>
+    <div class="panel-body">
+      <div style="display:flex;gap:16px;align-items:flex-start;margin-bottom:20px">
+        <div style="width:64px;height:64px;border-radius:16px;background:linear-gradient(135deg,#6366f1,#a78bfa);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;color:white;flex-shrink:0"
+             th:text="${#strings.substring(instructor.firstName,0,1)}+${#strings.substring(instructor.lastName,0,1)}"></div>
+        <div>
+          <h3 style="font-size:20px;font-weight:700" th:text="${instructor.firstName + ' ' + instructor.lastName}"></h3>
+          <p style="color:var(--text-muted);margin-top:4px" th:text="${instructor.email}"></p>
+          <span class="badge badge-yellow" style="margin-top:8px">Pending Review</span>
+        </div>
+      </div>
+      <div style="background:var(--surface2);border-radius:12px;padding:16px">
+        <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);margin-bottom:8px">Professional Bio</div>
+        <p style="font-size:14px;line-height:1.6" th:text="${instructor.bio} ?: 'No bio provided'"></p>
+      </div>
+      <div style="margin-top:16px;font-size:13px;color:var(--text-muted)">
+        Applied on: <strong th:text="${instructor.createdAt}"></strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- Documents -->
+  <div class="panel">
+    <div class="panel-header">
+      <h2>📎 Submitted Documents</h2>
+      <span class="badge badge-blue" th:text="${documents.size()} + ' file(s)'"></span>
+    </div>
+    <div class="panel-body">
+      <div th:if="${documents.isEmpty()}" style="text-align:center;padding:40px;color:var(--text-muted)">
+        <div style="font-size:40px;margin-bottom:12px">📭</div>
+        <p>No documents submitted</p>
+      </div>
+      <div th:each="doc : ${documents}" style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--surface2);border-radius:10px;margin-bottom:10px">
+        <div style="font-size:28px">📄</div>
+        <div style="flex:1;overflow:hidden">
+          <div style="font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" th:text="${doc.originalName}"></div>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:2px" th:text="${doc.fileType} + ' · ' + ${#temporals.format(doc.uploadedAt, 'MMM dd, yyyy')}"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Action Panel -->
+<div class="panel" style="margin-top:24px">
+  <div class="panel-header"><h2>⚖️ Decision</h2></div>
+  <div class="panel-body" style="display:flex;gap:16px;flex-wrap:wrap">
+    <form th:action="@{/ui/admin/instructors/{id}/approve(id=${instructor.id})}" method="post">
+      <button class="btn btn-success">✅ Approve Instructor</button>
+    </form>
+
+    <div id="rejectSection" style="flex:1">
+      <form th:action="@{/ui/admin/instructors/{id}/reject(id=${instructor.id})}" method="post"
+            style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <input type="text" name="reason" placeholder="Rejection reason…"
+               style="flex:1;min-width:200px;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:9px 14px;border-radius:10px;font-size:14px;outline:none"/>
+        <button class="btn btn-danger">✕ Reject</button>
+      </form>
+    </div>
+  </div>
+</div>
+</main>
+</body>
+</html>
+

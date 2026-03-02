@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>My Notifications</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}" />
+</head>
+<body>
+<div th:insert="layout/navbar"></div>
+
+<div class="container" style="margin-top: 40px;">
+    <div class="section">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2>📬 My Notifications</h2>
+            <button class="btn-primary" id="markAllRead" style="padding: 10px 20px;">Mark All as Read</button>
+        </div>
+
+        <div id="notificationsList">
+            <!-- Notifications will be loaded here -->
+            <p style="text-align: center; color: #718096;">Loading notifications...</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    function loadNotifications() {
+        fetch('/api/notifications')
+            .then(r => r.json())
+            .then(notifications => {
+                const html = notifications.length === 0
+                    ? '<p style="text-align: center; color: #718096;">No notifications yet</p>'
+                    : notifications.map(n => `
+                        <div class="notification-item" style="
+                            padding: 16px;
+                            border-left: 4px solid #667eea;
+                            background: ${n.isRead ? '#f7fafc' : '#fff'};
+                            margin-bottom: 12px;
+                            border-radius: 8px;
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: flex-start;
+                        ">
+                            <div style="flex: 1;">
+                                <h4 style="margin: 0 0 8px 0; color: #2d3748;">${n.title}</h4>
+                                <p style="margin: 0 0 8px 0; color: #718096; font-size: 14px;">${n.message}</p>
+                                <small style="color: #cbd5e0;">${new Date(n.createdAt).toLocaleString()}</small>
+                            </div>
+                            <div style="display: flex; gap: 8px; margin-left: 16px;">
+                                ${!n.isRead ? `<button onclick="markAsRead(${n.id})" class="btn-small">Mark as Read</button>` : ''}
+                                <button onclick="deleteNotification(${n.id})" class="btn-small danger">Delete</button>
+                            </div>
+                        </div>
+                    `).join('');
+
+                document.getElementById('notificationsList').innerHTML = html;
+            })
+            .catch(e => console.log('Error loading notifications', e));
+    }
+
+    function markAsRead(id) {
+        fetch(`/api/notifications/${id}/read`, { method: 'POST' })
+            .then(() => loadNotifications());
+    }
+
+    function deleteNotification(id) {
+        fetch(`/api/notifications/${id}`, { method: 'DELETE' })
+            .then(() => loadNotifications());
+    }
+
+    document.getElementById('markAllRead').addEventListener('click', () => {
+        fetch('/api/notifications/read-all', { method: 'POST' })
+            .then(() => loadNotifications());
+    });
+
+    // Load on page load and refresh every 30 seconds
+    loadNotifications();
+    setInterval(loadNotifications, 30000);
+</script>
+
+<style>
+    .btn-small {
+        padding: 6px 12px;
+        border: none;
+        border-radius: 6px;
+        background: #667eea;
+        color: white;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-small:hover {
+        background: #5568d3;
+        transform: translateY(-1px);
+    }
+
+    .btn-small.danger {
+        background: #f56565;
+    }
+
+    .btn-small.danger:hover {
+        background: #e53e3e;
+    }
+</style>
+</body>
+</html>
+

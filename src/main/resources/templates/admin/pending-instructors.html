@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Pending Instructors - EduLearn</title>
+<th:block th:replace="~{layout/navbar :: head}"></th:block>
+</head>
+<body>
+<th:block th:replace="~{layout/navbar :: chrome}"></th:block>
+
+<div style="margin-bottom:20px;display:flex;align-items:center;justify-content:space-between">
+  <div>
+    <h1 style="font-size:22px;font-weight:800">📋 Pending Instructor Applications</h1>
+    <p style="color:var(--text-muted);font-size:14px;margin-top:4px">Review and approve instructor registrations</p>
+  </div>
+  <span class="badge badge-yellow" th:text="${pendingInstructors.size()} + ' Pending'"></span>
+</div>
+
+<div th:if="${param.approved}" style="background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.3);border-radius:12px;padding:14px 16px;margin-bottom:20px;color:#4ade80;font-size:14px">
+  ✅ Instructor approved and notified.
+</div>
+<div th:if="${param.rejected}" style="background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);border-radius:12px;padding:14px 16px;margin-bottom:20px;color:#f87171;font-size:14px">
+  ❌ Instructor application rejected.
+</div>
+
+<div th:if="${pendingInstructors.isEmpty()}" class="panel">
+  <div class="panel-body" style="text-align:center;padding:60px;color:var(--text-muted)">
+    <div style="font-size:48px;margin-bottom:16px">🎉</div>
+    <h3 style="font-size:18px;margin-bottom:8px">All Caught Up!</h3>
+    <p>No pending instructor applications at this time.</p>
+  </div>
+</div>
+
+<div th:each="instructor : ${pendingInstructors}" class="panel" style="margin-bottom:16px">
+  <div class="panel-body">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap">
+      <div style="display:flex;gap:16px;align-items:flex-start">
+        <div style="width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#6366f1,#a78bfa);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:white;flex-shrink:0"
+             th:text="${#strings.substring(instructor.firstName,0,1)}+${#strings.substring(instructor.lastName,0,1)}"></div>
+        <div>
+          <h3 style="font-size:17px;font-weight:700" th:text="${instructor.firstName} + ' ' + ${instructor.lastName}"></h3>
+          <p style="color:var(--text-muted);font-size:14px;margin:4px 0" th:text="${instructor.email}"></p>
+          <p style="font-size:13px;color:var(--text-muted);margin-top:6px;max-width:500px" th:text="${instructor.bio} ?: 'No bio provided'"></p>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;flex-shrink:0">
+        <a th:href="@{/ui/admin/instructors/{id}/review(id=${instructor.id})}" class="btn btn-ghost btn-sm">🔍 Review Docs</a>
+
+        <form th:action="@{/ui/admin/instructors/{id}/approve(id=${instructor.id})}" method="post" style="margin:0">
+          <button class="btn btn-success btn-sm">✅ Approve</button>
+        </form>
+
+        <button onclick="showRejectModal(this)"
+                th:data-id="${instructor.id}"
+                class="btn btn-danger btn-sm">✕ Reject</button>
+      </div>
+    </div>
+    <div style="margin-top:12px;font-size:12px;color:var(--text-muted)">
+      Applied: <span th:text="${instructor.createdAt}"></span>
+    </div>
+  </div>
+</div>
+
+<!-- Reject Modal -->
+<div id="rejectModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:3000;align-items:center;justify-content:center">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:28px;width:100%;max-width:420px">
+    <h2 style="font-size:18px;margin-bottom:16px">❌ Reject Application</h2>
+    <form id="rejectForm" method="post">
+      <div class="form-group">
+        <label>Reason for Rejection</label>
+        <textarea name="reason" rows="4" placeholder="Explain why the application is being rejected…" required
+                  style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:10px;font-size:14px;outline:none"></textarea>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button type="button" onclick="document.getElementById('rejectModal').style.display='none'" class="btn btn-ghost">Cancel</button>
+        <button type="submit" class="btn btn-danger">Reject</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function showRejectModal(btn) {
+  const id = btn.dataset.id;
+  document.getElementById('rejectForm').action = '/ui/admin/instructors/' + id + '/reject';
+  document.getElementById('rejectModal').style.display = 'flex';
+}
+</script>
+</main>
+</body>
+</html>
+

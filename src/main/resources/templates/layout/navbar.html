@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:fragment="head">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle} ?: 'EduLearn Platform'">EduLearn Platform</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}" />
+    <style>
+        :root{--nav-h:64px;--sidebar-w:260px;--primary:#6366f1;--primary-dark:#4f46e5;--surface:#1e1e2e;--surface2:#2a2a3e;--text:#e2e8f0;--text-muted:#94a3b8;--border:rgba(255,255,255,0.08);--accent:#a78bfa}
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:#0f0f1a;color:var(--text);padding-top:var(--nav-h)}
+
+        /* TOP NAV */
+        .topnav{position:fixed;top:0;left:0;right:0;height:var(--nav-h);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:16px;padding:0 20px;z-index:1000;backdrop-filter:blur(12px)}
+        .topnav-brand{display:flex;align-items:center;gap:10px;color:white;font-size:20px;font-weight:800;text-decoration:none;white-space:nowrap}
+        .logo-icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;font-size:18px}
+        .hamburger{background:none;border:none;color:var(--text-muted);cursor:pointer;padding:8px;border-radius:8px;display:flex;flex-direction:column;gap:5px;transition:background .2s}
+        .hamburger:hover{background:var(--border)}
+        .hamburger span{display:block;width:22px;height:2px;background:currentColor;border-radius:2px;transition:all .3s}
+        .hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+        .hamburger.open span:nth-child(2){opacity:0}
+        .hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+
+        /* SEARCH */
+        .search-wrap{flex:1;max-width:480px;position:relative}
+        .search-wrap input{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:9px 16px 9px 40px;border-radius:12px;font-size:14px;outline:none;transition:border-color .2s,box-shadow .2s}
+        .search-wrap input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(99,102,241,.2)}
+        .search-wrap .sicon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:16px;pointer-events:none}
+        .search-wrap input::placeholder{color:var(--text-muted)}
+        .search-dd{position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:0 16px 40px rgba(0,0,0,.5);display:none;z-index:2000;max-height:400px;overflow-y:auto}
+        .search-dd.active{display:block}
+        .sd-section{padding:12px 16px 4px;font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);letter-spacing:.08em}
+        .sd-item{display:flex;align-items:center;gap:12px;padding:10px 16px;cursor:pointer;transition:background .15s;text-decoration:none;color:var(--text)}
+        .sd-item:hover{background:var(--surface2)}
+        .sd-item .sd-icon{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+        .sd-item .sdi-title{font-size:14px;font-weight:500}
+        .sd-item .sdi-sub{font-size:12px;color:var(--text-muted)}
+        .sd-empty{padding:24px;text-align:center;color:var(--text-muted);font-size:14px}
+
+        /* NAV END */
+        .topnav-end{display:flex;align-items:center;gap:8px;margin-left:auto}
+        .nav-icon-btn{position:relative;background:none;border:none;color:var(--text-muted);padding:8px;border-radius:10px;cursor:pointer;font-size:18px;transition:all .2s;display:flex;align-items:center;justify-content:center;text-decoration:none}
+        .nav-icon-btn:hover{background:var(--surface2);color:var(--text)}
+        .nav-badge{position:absolute;top:2px;right:2px;background:#ef4444;color:white;border-radius:50%;width:16px;height:16px;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+        /* PROFILE */
+        .profile-btn{display:flex;align-items:center;gap:10px;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 12px 6px 6px;border-radius:12px;cursor:pointer;transition:all .2s}
+        .profile-btn:hover{border-color:var(--primary)}
+        .profile-avatar{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:white}
+        .profile-info{text-align:left;line-height:1.2}
+        .profile-info .pname{font-size:13px;font-weight:600}
+        .profile-info .prole{font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:.04em}
+        .profile-chevron{font-size:10px;color:var(--text-muted)}
+        .profile-menu{position:absolute;top:calc(100% + 8px);right:0;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:0 16px 40px rgba(0,0,0,.5);min-width:220px;display:none;z-index:2000}
+        .profile-menu.active{display:block}
+        .pmh{padding:16px;border-bottom:1px solid var(--border)}
+        .pmh-name{font-weight:700;font-size:15px}
+        .pmh-email{font-size:12px;color:var(--text-muted);margin-top:2px}
+        .profile-menu a,.profile-menu button{display:flex;align-items:center;gap:10px;padding:10px 16px;color:var(--text);text-decoration:none;font-size:14px;transition:background .15s;width:100%;background:none;border:none;cursor:pointer;text-align:left}
+        .profile-menu a:hover,.profile-menu button:hover{background:var(--surface2)}
+        .pm-icon{font-size:16px;width:20px;text-align:center}
+        .pm-divider{height:1px;background:var(--border);margin:4px 0}
+        .pm-danger{color:#f87171 !important}
+        .pm-danger:hover{background:rgba(248,113,113,.1) !important}
+
+        /* SIDEBAR */
+        .sidebar{position:fixed;top:var(--nav-h);left:0;bottom:0;width:var(--sidebar-w);background:var(--surface);border-right:1px solid var(--border);overflow-y:auto;overflow-x:hidden;transition:transform .3s cubic-bezier(.4,0,.2,1),width .3s;z-index:900}
+        .sidebar.collapsed{width:64px}
+        .sidebar-inner{padding:16px 8px;display:flex;flex-direction:column;gap:4px}
+        .sl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);padding:8px 12px 4px;white-space:nowrap;overflow:hidden;transition:opacity .2s}
+        .sidebar.collapsed .sl{opacity:0}
+        .sidebar-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;color:var(--text-muted);text-decoration:none;font-size:14px;font-weight:500;transition:all .2s;white-space:nowrap;overflow:hidden}
+        .si-icon{font-size:18px;flex-shrink:0;width:22px;text-align:center}
+        .si-label{transition:opacity .2s}
+        .sidebar.collapsed .si-label{opacity:0}
+        .sidebar-item:hover{background:var(--surface2);color:var(--text)}
+        .sidebar-item.active{background:linear-gradient(135deg,rgba(99,102,241,.25),rgba(167,139,250,.15));color:var(--accent);border:1px solid rgba(99,102,241,.3)}
+        .si-badge{margin-left:auto;background:#ef4444;color:white;border-radius:20px;padding:1px 7px;font-size:11px;font-weight:700;flex-shrink:0;transition:opacity .2s}
+        .sidebar.collapsed .si-badge{opacity:0}
+        .sg-header{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;color:var(--text-muted);font-size:14px;font-weight:500;cursor:pointer;transition:all .2s;white-space:nowrap;overflow:hidden;user-select:none}
+        .sg-header:hover{background:var(--surface2);color:var(--text)}
+        .sg-icon{font-size:18px;flex-shrink:0;width:22px;text-align:center}
+        .sg-label{flex:1;transition:opacity .2s}
+        .sidebar.collapsed .sg-label{opacity:0}
+        .sg-arrow{font-size:10px;transition:transform .3s;flex-shrink:0}
+        .sg-header.open .sg-arrow{transform:rotate(90deg)}
+        .sidebar.collapsed .sg-arrow{opacity:0}
+        .sidebar-sub{display:none;padding-left:20px;flex-direction:column;gap:2px}
+        .sidebar-sub.open{display:flex}
+        .sidebar.collapsed .sidebar-sub{display:none}
+        .sidebar-sub .sidebar-item{font-size:13px;padding:8px 10px}
+
+        /* MAIN */
+        .main-content{margin-left:var(--sidebar-w);padding:28px;transition:margin-left .3s;min-height:calc(100vh - var(--nav-h))}
+        .main-content.sc{margin-left:64px}
+
+        /* PAGINATION */
+        .pagination{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:16px}
+        .pagination a,.pagination span{display:inline-flex;align-items:center;justify-content:center;min-width:36px;height:36px;border-radius:8px;text-decoration:none;font-size:14px;font-weight:500;transition:all .2s;padding:0 10px}
+        .pagination a{color:var(--text-muted);background:var(--surface2);border:1px solid var(--border)}
+        .pagination a:hover{background:var(--primary);color:white;border-color:var(--primary)}
+        .pagination .pg-active{background:var(--primary);color:white;border:1px solid var(--primary)}
+        .pagination .pg-disabled{color:var(--text-muted);opacity:.4;pointer-events:none;background:var(--surface2);border:1px solid var(--border)}
+
+        /* TABLE */
+        .data-table{width:100%;border-collapse:collapse;font-size:14px}
+        .data-table th{background:var(--surface2);color:var(--text-muted);font-size:11px;text-transform:uppercase;letter-spacing:.08em;padding:12px 16px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap}
+        .data-table td{padding:14px 16px;border-bottom:1px solid var(--border);vertical-align:middle}
+        .data-table tbody tr:hover{background:rgba(255,255,255,.02)}
+        .data-table tbody tr:last-child td{border-bottom:none}
+
+        /* PANEL */
+        .panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:24px}
+        .panel-header{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px}
+        .panel-header h2{font-size:16px;font-weight:700}
+        .panel-body{padding:20px}
+
+        /* BADGES */
+        .badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;white-space:nowrap}
+        .badge-green{background:rgba(74,222,128,.15);color:#4ade80}
+        .badge-red{background:rgba(248,113,113,.15);color:#f87171}
+        .badge-yellow{background:rgba(250,204,21,.15);color:#facc15}
+        .badge-blue{background:rgba(96,165,250,.15);color:#60a5fa}
+        .badge-purple{background:rgba(167,139,250,.15);color:#a78bfa}
+        .badge-gray{background:rgba(148,163,184,.15);color:#94a3b8}
+
+        /* BUTTONS */
+        .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;font-size:14px;font-weight:600;border:none;cursor:pointer;text-decoration:none;transition:all .2s;white-space:nowrap}
+        .btn-primary{background:var(--primary);color:white}.btn-primary:hover{background:var(--primary-dark)}
+        .btn-sm{padding:5px 12px;font-size:12px}
+        .btn-ghost{background:var(--surface2);color:var(--text);border:1px solid var(--border)}.btn-ghost:hover{border-color:var(--primary);color:var(--accent)}
+        .btn-danger{background:rgba(248,113,113,.15);color:#f87171;border:1px solid rgba(248,113,113,.3)}.btn-danger:hover{background:#ef4444;color:white;border-color:#ef4444}
+        .btn-success{background:rgba(74,222,128,.15);color:#4ade80;border:1px solid rgba(74,222,128,.3)}.btn-success:hover{background:#22c55e;color:white;border-color:#22c55e}
+
+        /* TABLE TOOLBAR */
+        .table-toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:16px 20px;border-bottom:1px solid var(--border)}
+        .table-toolbar input,.table-toolbar select{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 14px;border-radius:10px;font-size:14px;outline:none;transition:border-color .2s}
+        .table-toolbar input:focus,.table-toolbar select:focus{border-color:var(--primary)}
+        .table-toolbar input::placeholder{color:var(--text-muted)}
+        .table-toolbar input{width:220px}
+        .toolbar-spacer{flex:1}
+
+        /* FORM */
+        .form-group{margin-bottom:16px}
+        .form-group label{display:block;font-size:13px;font-weight:600;color:var(--text-muted);margin-bottom:6px}
+        .form-group input,.form-group select,.form-group textarea{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:10px;font-size:14px;outline:none;transition:border-color .2s}
+        .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(99,102,241,.15)}
+        .form-group input::placeholder,.form-group textarea::placeholder{color:var(--text-muted)}
+
+        /* OVERLAY */
+        .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:850;backdrop-filter:blur(4px)}
+        .overlay.active{display:block}
+
+        @media(max-width:768px){
+            .sidebar{transform:translateX(-100%)}
+            .sidebar.mobile-open{transform:translateX(0)}
+            .main-content{margin-left:0 !important;padding:16px}
+            .search-wrap{max-width:200px}
+            .profile-info{display:none}
+        }
+    </style>
+</head>
+<body>
+<th:block th:fragment="chrome">
+<nav th:fragment="navbar" class="topnav">
+    <button class="hamburger" id="hamburgerBtn"><span></span><span></span><span></span></button>
+    <a th:href="@{/ui}" class="topnav-brand"><div class="logo-icon">🎓</div><span>EduLearn</span></a>
+
+    <div class="search-wrap" id="searchWrap">
+        <span class="sicon">🔍</span>
+        <input type="text" id="globalSearch" placeholder="Search courses, users…" autocomplete="off"/>
+        <div class="search-dd" id="searchDd"><div class="sd-empty">Start typing to search…</div></div>
+    </div>
+
+    <div class="topnav-end">
+        <button class="nav-icon-btn" onclick="location='/ui/notifications'" title="Notifications">
+            🔔 <span class="nav-badge" id="notifBadge" style="display:none">0</span>
+        </button>
+        <a th:href="@{/ui/admin/instructors/pending}" sec:authorize="hasRole('ADMIN')"
+           class="nav-icon-btn"
+           th:if="${pendingInstructorCount != null and #numbers.formatInteger(pendingInstructorCount,1) != '0'}"
+           title="Pending instructor approvals">
+            📋 <span class="nav-badge" th:text="${pendingInstructorCount}">0</span>
+        </a>
+        <div style="position:relative">
+            <button class="profile-btn" id="profileBtn">
+                <div class="profile-avatar">👤</div>
+                <div class="profile-info">
+                    <div class="pname" sec:authentication="name">User</div>
+                    <div class="prole" sec:authentication="authorities">Role</div>
+                </div>
+                <span class="profile-chevron">▼</span>
+            </button>
+            <div class="profile-menu" id="profileMenu">
+                <div class="pmh">
+                    <div class="pmh-name" sec:authentication="name">User</div>
+                    <div class="pmh-email" sec:authentication="authorities">Roles</div>
+                </div>
+                <a th:href="@{/ui/profile}"><span class="pm-icon">👤</span> My Profile</a>
+                <a th:href="@{/ui/notifications}"><span class="pm-icon">📬</span> Notifications</a>
+                <a th:href="@{/ui/subscriptions}"><span class="pm-icon">⭐</span> Subscriptions</a>
+                <div class="pm-divider"></div>
+                <a th:href="@{/ui/admin}" sec:authorize="hasRole('ADMIN')"><span class="pm-icon">⚙️</span> Admin Panel</a>
+                <a th:href="@{/ui/instructor}" sec:authorize="hasRole('INSTRUCTOR')"><span class="pm-icon">✏️</span> My Courses</a>
+                <div class="pm-divider"></div>
+                <form th:action="@{/logout}" method="post" style="margin:0">
+                    <button type="submit" class="pm-danger"><span class="pm-icon">🚪</span> Sign Out</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="overlay" id="overlay"></div>
+
+<aside th:fragment="sidebar" class="sidebar" id="sidebar">
+    <div class="sidebar-inner">
+        <div class="sl">Main</div>
+        <a th:href="@{/ui}" class="sidebar-item" id="nav-dashboard"><span class="si-icon">🏠</span><span class="si-label">Dashboard</span></a>
+        <a th:href="@{/ui/search}" class="sidebar-item"><span class="si-icon">🔍</span><span class="si-label">Search</span></a>
+
+        <div class="sg-header" onclick="toggleSG(this)"><span class="sg-icon">📚</span><span class="sg-label">Courses</span><span class="sg-arrow">▶</span></div>
+        <div class="sidebar-sub">
+            <a th:href="@{/ui/courses}" class="sidebar-item"><span class="si-icon">📖</span><span class="si-label">All Courses</span></a>
+            <a th:href="@{/ui/instructor}" sec:authorize="hasRole('INSTRUCTOR')" class="sidebar-item"><span class="si-icon">✏️</span><span class="si-label">My Courses</span></a>
+        </div>
+
+        <a th:href="@{/ui/enrollments}" sec:authorize="hasAnyRole('ADMIN','INSTRUCTOR')" class="sidebar-item"><span class="si-icon">🎫</span><span class="si-label">Enrollments</span></a>
+        <a th:href="@{/ui/analytics}" sec:authorize="hasAnyRole('ADMIN','INSTRUCTOR')" class="sidebar-item"><span class="si-icon">📊</span><span class="si-label">Analytics</span></a>
+
+        <div sec:authorize="hasRole('ADMIN')">
+            <div class="sl" style="margin-top:8px">Administration</div>
+            <div class="sg-header" onclick="toggleSG(this)"><span class="sg-icon">⚙️</span><span class="sg-label">Admin</span><span class="sg-arrow">▶</span></div>
+            <div class="sidebar-sub">
+                <a th:href="@{/ui/admin}" class="sidebar-item"><span class="si-icon">🏛️</span><span class="si-label">Overview</span></a>
+                <a th:href="@{/ui/admin/users}" class="sidebar-item"><span class="si-icon">👥</span><span class="si-label">Users</span></a>
+                <a th:href="@{/ui/admin/instructors/pending}" class="sidebar-item">
+                    <span class="si-icon">📋</span><span class="si-label">Pending</span>
+                    <span class="si-badge" th:if="${pendingInstructorCount != null and #numbers.formatInteger(pendingInstructorCount,1) != '0'}" th:text="${pendingInstructorCount}">0</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="sl" style="margin-top:8px">Personal</div>
+        <a th:href="@{/ui/notifications}" class="sidebar-item"><span class="si-icon">🔔</span><span class="si-label">Notifications</span><span class="si-badge" id="sideNotifBadge" style="display:none">0</span></a>
+        <a th:href="@{/ui/subscriptions}" class="sidebar-item"><span class="si-icon">⭐</span><span class="si-label">Subscriptions</span></a>
+    </div>
+</aside>
+
+<main class="main-content" id="mainContent">
+
+<script>
+const sidebar=document.getElementById('sidebar'),mc=document.getElementById('mainContent'),hb=document.getElementById('hamburgerBtn'),ov=document.getElementById('overlay');
+let mob=window.innerWidth<=768,col=false;
+hb.addEventListener('click',()=>{hb.classList.toggle('open');if(mob){sidebar.classList.toggle('mobile-open');ov.classList.toggle('active')}else{col=!col;sidebar.classList.toggle('collapsed',col);mc.classList.toggle('sc',col)}});
+ov.addEventListener('click',()=>{sidebar.classList.remove('mobile-open');ov.classList.remove('active');hb.classList.remove('open')});
+window.addEventListener('resize',()=>{mob=window.innerWidth<=768});
+function toggleSG(h){h.classList.toggle('open');h.nextElementSibling.classList.toggle('open')}
+document.querySelectorAll('.sidebar-sub .sidebar-item.active').forEach(i=>{const s=i.closest('.sidebar-sub'),h=s.previousElementSibling;s.classList.add('open');h.classList.add('open')});
+// Profile
+const pb=document.getElementById('profileBtn'),pm=document.getElementById('profileMenu');
+pb.addEventListener('click',e=>{e.stopPropagation();pm.classList.toggle('active')});
+document.addEventListener('click',e=>{if(!e.target.closest('#profileBtn'))pm.classList.remove('active')});
+// Search
+const gs=document.getElementById('globalSearch'),sdd=document.getElementById('searchDd');
+let st;
+gs.addEventListener('input',()=>{clearTimeout(st);const q=gs.value.trim();if(!q){sdd.classList.remove('active');return}sdd.classList.add('active');st=setTimeout(()=>doSearch(q),300)});
+gs.addEventListener('focus',()=>{if(gs.value.trim())sdd.classList.add('active')});
+document.addEventListener('click',e=>{if(!e.target.closest('#searchWrap'))sdd.classList.remove('active')});
+gs.addEventListener('keydown',e=>{if(e.key==='Enter')location='/ui/search?q='+encodeURIComponent(gs.value.trim())});
+function doSearch(q){fetch('/ui/api/search?q='+encodeURIComponent(q)).then(r=>r.json()).then(d=>renderSD(d,q)).catch(()=>{})}
+function renderSD(d,q){let h='';
+if(!d.total){h='<div class="sd-empty">No results for "'+esc(q)+'"</div>'}
+else{if(d.courses?.length){h+='<div class="sd-section">📚 Courses</div>';d.courses.forEach(c=>{h+=`<a href="/ui/courses" class="sd-item"><div class="sd-icon">📖</div><div><div class="sdi-title">${esc(c.title)}</div><div class="sdi-sub">${esc(c.category)} · ${esc(c.level)}</div></div></a>`})}
+if(d.users?.length){h+='<div class="sd-section">👥 Users</div>';d.users.forEach(u=>{h+=`<a href="/ui/admin/users" class="sd-item"><div class="sd-icon">👤</div><div><div class="sdi-title">${esc(u.firstName)} ${esc(u.lastName)}</div><div class="sdi-sub">${esc(u.email)}</div></div></a>`})}
+h+=`<a href="/ui/search?q=${encodeURIComponent(q)}" class="sd-item" style="justify-content:center;color:var(--accent)">View all →</a>`}
+sdd.innerHTML=h}
+function esc(s){if(!s)return'';return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+// Notif
+function loadNotif(){fetch('/api/notifications/count').then(r=>r.json()).then(d=>{const b=document.getElementById('notifBadge'),sb=document.getElementById('sideNotifBadge');if(d.count>0){b.textContent=d.count;b.style.display='flex';sb.textContent=d.count;sb.style.display='flex'}else{b.style.display='none';sb.style.display='none'}}).catch(()=>{})}
+loadNotif();setInterval(loadNotif,15000);
+// Active nav
+const p=location.pathname;
+document.querySelectorAll('.sidebar-item').forEach(a=>{if(a.getAttribute('href')===p)a.classList.add('active')});
+</script>
+</th:block>

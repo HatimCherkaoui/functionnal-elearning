@@ -1,0 +1,41 @@
+databaseChangeLog:
+  - changeSet:
+      id: 003-seed-admin-user
+      author: elearning
+      changes:
+        - insert:
+            tableName: users
+            columns:
+              - column:
+                  name: first_name
+                  value: Admin
+              - column:
+                  name: last_name
+                  value: User
+              - column:
+                  name: email
+                  value: admin@elearning.com
+              - column:
+                  # BCrypt hash for "admin123"
+                  name: password
+                  value: "$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iJSNvZs3obQIaLHnGCbXCNMQLDlC"
+              - column:
+                  name: role
+                  value: ADMIN
+              - column:
+                  name: is_active
+                  valueBoolean: true
+              - column:
+                  name: approval_status
+                  value: APPROVED
+              - column:
+                  name: created_at
+                  valueDate: now()
+              - column:
+                  name: updated_at
+                  valueDate: now()
+      rollback:
+        - delete:
+            tableName: users
+            where: email='admin@elearning.com'
+

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Courses - EduLearn</title>
+<th:block th:replace="~{layout/navbar :: head}"></th:block>
+</head>
+<body>
+<th:block th:replace="~{layout/navbar :: chrome}"></th:block>
+
+<div class="panel">
+  <div class="panel-header">
+    <h2>📚 Courses</h2>
+    <a href="#" onclick="document.getElementById('addCourseModal').style.display='flex'" class="btn btn-primary btn-sm">＋ Add Course</a>
+  </div>
+
+  <!-- Toolbar -->
+  <form method="get" th:action="@{/ui/courses}">
+    <div class="table-toolbar">
+      <input type="text" name="search" th:value="${search}" placeholder="🔍 Search courses…" oninput="this.form.submit()"/>
+      <select name="sort" onchange="this.form.submit()">
+        <option value="createdAt" th:selected="${sort == 'createdAt'}">Newest</option>
+        <option value="rating" th:selected="${sort == 'rating'}">Top Rated</option>
+        <option value="price" th:selected="${sort == 'price'}">Price</option>
+      </select>
+      <span class="toolbar-spacer"></span>
+      <span style="font-size:13px;color:var(--text-muted)" th:if="${coursesPage != null}"
+            th:text="'Showing ' + ${coursesPage.numberOfElements} + ' of ' + ${coursesPage.totalElements}"></span>
+    </div>
+  </form>
+
+  <div style="overflow-x:auto">
+    <table class="data-table">
+      <thead><tr><th>ID</th><th>Title</th><th>Category</th><th>Level</th><th>Price</th><th>Rating</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody>
+        <tr th:each="c : ${coursesPage.content}">
+          <td th:text="${c.id}"></td>
+          <td style="font-weight:600" th:text="${c.title}"></td>
+          <td><span class="badge badge-purple" th:text="${c.category}"></span></td>
+          <td><span class="badge badge-blue" th:text="${c.level}"></span></td>
+          <td th:text="'$' + ${#numbers.formatDecimal(c.price,1,2)}"></td>
+          <td th:text="${c.rating != null ? #numbers.formatDecimal(c.rating,1,1) + ' ⭐' : '—'}"></td>
+          <td>
+            <span th:if="${c.isPublished}" class="badge badge-green">Published</span>
+            <span th:unless="${c.isPublished}" class="badge badge-gray">Draft</span>
+          </td>
+          <td style="display:flex;gap:6px;flex-wrap:wrap">
+            <form th:unless="${c.isPublished}" th:action="@{/ui/courses/{id}/publish(id=${c.id})}" method="post" style="margin:0">
+              <button class="btn btn-sm btn-success">Publish</button>
+            </form>
+            <form th:action="@{/ui/courses/{id}/delete(id=${c.id})}" method="post" style="margin:0" onsubmit="return confirm('Delete?')">
+              <button class="btn btn-sm btn-danger">Delete</button>
+            </form>
+          </td>
+        </tr>
+        <tr th:if="${coursesPage == null or coursesPage.content.isEmpty()}">
+          <td colspan="8" style="text-align:center;padding:40px;color:var(--text-muted)">No courses found</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <div style="padding:16px 20px;border-top:1px solid var(--border)" th:if="${coursesPage != null and coursesPage.totalPages > 1}">
+    <div class="pagination">
+      <a th:if="${!coursesPage.first}" th:href="@{/ui/courses(page=${coursesPage.number-1},size=${coursesPage.size},sort=${sort},search=${search})}">‹ Prev</a>
+      <span class="pg-disabled" th:unless="${!coursesPage.first}">‹ Prev</span>
+      <th:block th:each="i : ${#numbers.sequence(0, coursesPage.totalPages - 1)}">
+        <a th:if="${i != coursesPage.number}" th:href="@{/ui/courses(page=${i},size=${coursesPage.size},sort=${sort},search=${search})}" th:text="${i+1}"></a>
+        <span th:if="${i == coursesPage.number}" class="pg-active" th:text="${i+1}"></span>
+      </th:block>
+      <a th:if="${!coursesPage.last}" th:href="@{/ui/courses(page=${coursesPage.number+1},size=${coursesPage.size},sort=${sort},search=${search})}">Next ›</a>
+      <span class="pg-disabled" th:unless="${!coursesPage.last}">Next ›</span>
+    </div>
+  </div>
+</div>
+
+<!-- Add Course Modal -->
+<div id="addCourseModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:3000;align-items:center;justify-content:center">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:28px;width:100%;max-width:500px;max-height:90vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <h2 style="font-size:18px">➕ New Course</h2>
+      <button onclick="document.getElementById('addCourseModal').style.display='none'" style="background:none;border:none;color:var(--text-muted);font-size:20px;cursor:pointer">✕</button>
+    </div>
+    <form th:action="@{/ui/courses}" method="post" th:object="${courseForm}">
+      <div class="form-group"><label>Title</label><input th:field="*{title}" placeholder="Course title" required/></div>
+      <div class="form-group"><label>Category</label><input th:field="*{category}" placeholder="e.g. Programming" required/></div>
+      <div class="form-group"><label>Level</label>
+        <select th:field="*{level}">
+          <option value="BEGINNER">Beginner</option><option value="INTERMEDIATE">Intermediate</option>
+          <option value="ADVANCED">Advanced</option><option value="EXPERT">Expert</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Price ($)</label><input type="number" step="0.01" th:field="*{price}" placeholder="29.99" required/></div>
+      <div class="form-group"><label>Description</label><textarea th:field="*{description}" rows="3" placeholder="Describe the course…" required></textarea></div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button type="button" onclick="document.getElementById('addCourseModal').style.display='none'" class="btn btn-ghost">Cancel</button>
+        <button type="submit" class="btn btn-primary">Create Course</button>
+      </div>
+    </form>
+  </div>
+</div>
+</main>
+</body>
+</html>
